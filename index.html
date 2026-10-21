@@ -226,7 +226,7 @@ h1, h2, h3 { text-wrap: balance; }
 
 /* ---------- 보기 ---------- */
 .choices { display: grid; gap: 10px; grid-template-columns: 1fr; }
-@media (min-width: 560px) { .choices { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 560px) { .choices { grid-template-columns: 1fr 1fr; } .choices > .choice:last-child:nth-child(odd) { grid-column: 1 / -1; } }
 .choice {
   display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 12px 16px; border-radius: 17px; text-align: left;
   background: var(--surface); border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(15,23,38,.04);
@@ -843,7 +843,7 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
   }
 
   function CardRun({ s, w, preview, ghosts, dispatch, speakingId, speak, active }) {
-    const nChoices = s.mode === "learn" ? 2 : 4;
+    const nChoices = s.mode === "learn" ? 5 : 4;
     const choices = useMemo(() => (preview ? [] : L.makeChoices(w.id, nChoices)), []);
     const [flipped, setFlipped] = useState(false);
     const [picked, setPicked] = useState(null);
@@ -947,7 +947,7 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
       const onKey = (e) => {
         if (e.metaKey || e.ctrlKey || e.altKey) return;
         const tag = e.target && e.target.tagName;
-        if (/^[1-4]$/.test(e.key)) {
+        if (/^[1-5]$/.test(e.key)) {
           const c = choices[Number(e.key) - 1];
           if (c !== undefined) { e.preventDefault(); choose(c); }
           return;
@@ -964,7 +964,7 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
 
     const v = picked && verdictOf(picked);
     const speaking = speakingId === w.id;
-    const prompt = preview ? "탭해서 뜻 보기" : picked ? (picked.grade === "know" ? "" : "탭하면 다시 뒤집혀요") : (nChoices === 2 ? "아래 두 뜻 중에서 골라 주세요" : "네 개의 뜻 중에서 골라 주세요");
+    const prompt = preview ? "탭해서 뜻 보기" : picked ? (picked.grade === "know" ? "" : "탭하면 다시 뒤집혀요") : (nChoices === 5 ? "다섯 개의 뜻 중에서 골라 주세요" : "네 개의 뜻 중에서 골라 주세요");
 
     return html`
       <div class="grid gap-5">
@@ -1112,7 +1112,7 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
         ${w ? html`<${CardRun} key=${s.cardKey} s=${s} w=${w} preview=${preview} ghosts=${ghosts}
                      dispatch=${dispatch} speakingId=${speakingId} speak=${speak} active=${active && !overlay} />`
             : html`<div class="card-stage"><div class="card-3d"><div class="face"><p class="text-muted">이번 단계 완료</p></div></div></div>`}
-        ${s.mode === "learn" && html`<p class="hidden sm:flex hint-row justify-center"><span><span class="kbd">1</span><span class="kbd">2</span> 보기 선택</span><span><span class="kbd">Space</span> 뒤집기·다음</span><span><span class="kbd">P</span> 발음</span></p>`}
+        ${s.mode === "learn" && html`<p class="hidden sm:flex hint-row justify-center"><span><span class="kbd">1</span>–<span class="kbd">5</span> 보기 선택</span><span><span class="kbd">Space</span> 뒤집기·다음</span><span><span class="kbd">P</span> 발음</span></p>`}
         ${s.mode === "quiz" && html`<p class="hidden sm:flex hint-row justify-center"><span><span class="kbd">1</span>–<span class="kbd">4</span> 보기 선택</span><span><span class="kbd">Enter</span> 다음</span><span><span class="kbd">P</span> 발음</span></p>`}
         ${overlay && html`<${Celebrate} key=${s.stage + s.phaseIdx} ...${celebrateProps(s, dispatch)} />`}
       </div>`;
