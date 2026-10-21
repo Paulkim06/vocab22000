@@ -294,6 +294,47 @@ h1, h2, h3 { text-wrap: balance; }
 .confetti i { position: absolute; top: -24px; border-radius: 2px; animation-name: fall; animation-timing-function: cubic-bezier(.3,.55,.55,1); animation-fill-mode: both; }
 @keyframes fall { from { transform: translate3d(0,0,0) rotate(var(--r)); } to { transform: translate3d(var(--drift), 110vh, 0) rotate(calc(var(--r) + 600deg)); } }
 
+
+/* ---------- 첫 화면(2026-10-21 정돈: 효과 절제, 크기로 위계, 여백으로 묶기) ---------- */
+.home { max-width: 960px; margin: 0 auto; padding: 24px 0 128px; display: grid; gap: 48px; }
+.home-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.home .logo { box-shadow: none; background: var(--brand); }
+.home-note { font-size: 12px; color: var(--muted); }
+.home-hero { display: grid; gap: 24px; align-items: end; }
+@media (min-width: 760px) { .home-hero { grid-template-columns: 1fr 360px; gap: 48px; } }
+.home-hero-text { display: grid; gap: 8px; }
+.home-h1 { font-size: clamp(28px, 4.4vw, 40px); font-weight: 700; letter-spacing: -.025em; line-height: 1.25; word-break: keep-all; }
+.home-h2 { font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
+.home-desc { font-size: 15px; color: var(--ink-2); line-height: 1.5; word-break: keep-all; }
+.home-hero-side { position: relative; }
+.home-mascot { position: absolute; right: 8px; top: -60px; pointer-events: none; }
+.home-stat { display: grid; gap: 12px; padding: 20px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+.home-stat-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.home-stat-label { font-size: 14px; color: var(--ink-2); font-weight: 500; }
+.home-stat-num b { font-size: 32px; font-weight: 700; letter-spacing: -.02em; }
+.home-stat-num span { font-size: 15px; color: var(--muted); }
+.home-stat-meta { display: flex; gap: 24px; margin: 0; }
+.home-stat-meta div { display: flex; gap: 6px; align-items: baseline; }
+.home-stat-meta dt { font-size: 13px; color: var(--muted); }
+.home-stat-meta dd { margin: 0; font-size: 15px; font-weight: 600; }
+.home-modes { display: grid; gap: 40px; }
+.home-mode { display: grid; gap: 16px; }
+.home-mode-head { display: grid; gap: 4px; }
+.size-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.size-btn { display: flex; align-items: baseline; justify-content: center; gap: 4px; flex-wrap: wrap; min-height: 64px; padding: 12px 8px;
+  border-radius: 12px; background: var(--surface); border: 1px solid var(--line); text-align: center;
+  transition: border-color .2s, background-color .2s, transform .2s var(--spring); }
+.size-btn:hover:not([aria-disabled="true"]) { border-color: var(--brand); background: var(--brand-soft); }
+.size-btn:active:not([aria-disabled="true"]) { transform: scale(.98); }
+.size-btn[aria-disabled="true"] { cursor: not-allowed; opacity: .45; }
+.size-num { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+.size-unit { font-size: 14px; color: var(--ink-2); }
+.size-note { flex-basis: 100%; font-size: 12px; color: var(--muted); }
+.home-footer { display: flex; justify-content: flex-end; font-size: 13px; }
+.home .resume { border-radius: 16px; }
+.review-fab { box-shadow: 0 2px 8px rgba(15,23,38,.08); border-color: var(--line); }
+.review-fab .ic { background: var(--brand); }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: .01ms !important; }
 }
@@ -1207,52 +1248,44 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
   /* ---------- 대시보드 ---------- */
   function StatPanel({ c }) {
     const pct = c.total ? c.learned / c.total : 0;
+    const second = c.inProgress ? ["공부 중", c.inProgress] : ["복습 가능", c.learned];
     return html`
-      <div class="panel p-6 grid gap-5 relative overflow-hidden">
-        <div class="absolute right-3 top-2 bob" aria-hidden="true"><${Mascot} pose="great" size=${92} /></div>
-        <div class="grid gap-1">
-          <p class="text-[13px] text-muted font-medium">외운 단어</p>
-          <p class="flex items-baseline gap-2"><span class="stat-num tnum">${c.learned}</span><span class="text-muted tnum">/ ${c.total}</span></p>
+      <div class="home-stat" aria-label="학습 현황">
+        <div class="home-stat-row">
+          <p class="home-stat-label">외운 단어</p>
+          <p class="home-stat-num tnum"><b>${c.learned}</b><span> / ${c.total}</span></p>
         </div>
         <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax=${c.total} aria-valuenow=${c.learned} aria-label="외운 단어 비율">
           <span style=${{ transform: `scaleX(${pct})` }}></span>
         </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div class="rounded-2xl px-3.5 py-3" style=${{ background: "var(--surface-2)" }}>
-            <p class="text-[12px] text-muted">남은 새 단어</p><p class="text-[18px] font-bold tnum">${c.unlearned}</p>
-          </div>
-          <div class="rounded-2xl px-3.5 py-3" style=${{ background: "var(--surface-2)" }}>
-            <p class="text-[12px] text-muted">${c.inProgress ? "공부 중" : "복습 가능"}</p><p class="text-[18px] font-bold tnum">${c.inProgress || c.learned}</p>
-          </div>
-        </div>
+        <dl class="home-stat-meta tnum">
+          <div><dt>남은 새 단어</dt><dd>${c.unlearned}</dd></div>
+          <div><dt>${second[0]}</dt><dd>${second[1]}</dd></div>
+        </dl>
       </div>`;
   }
 
-  function ModeCard({ n, mode, c, onStart }) {
+  function SizeButton({ n, mode, c, onStart }) {
     const disabled = mode === "learn" && c.unlearned < n;
-    const flow = mode === "learn" ? L.flowOf(n) : [`4지선다 ${n}문항`, "모두 맞힐 때까지 반복", "첫 시도 정답률 측정"];
+    const unit = mode === "learn" ? "단어" : "문항";
     const go = () => { if (!disabled) onStart(mode, mode === "learn" ? "new" : "quiz", n); };
     return html`
-      <button type="button" class="mode" aria-disabled=${disabled} onClick=${go}
+      <button type="button" class="size-btn" aria-disabled=${disabled} onClick=${go}
         aria-label=${`${mode === "learn" ? "단어 암기" : "객관식 퀴즈"} ${n}${mode === "learn" ? "개" : "문항"} ${disabled ? "(새 단어 부족)" : "시작"}`}>
-        <div class="flex items-baseline justify-between gap-3">
-          <span class="mode-num tnum">${n}</span>
-          <span class="mode-unit">${mode === "learn" ? "단어" : "문항"}</span>
-        </div>
-        <ol class="flow">${flow.map((f, i) => html`<li key=${i}>${f}</li>`)}</ol>
-        <span class="mode-cta">${disabled ? `새 단어 ${c.unlearned}개 남음` : "시작하기"}${!disabled && html`<${I.ArrowRight} size=${16} />`}</span>
+        <span class="size-num tnum">${n}</span><span class="size-unit">${unit}</span>
+        ${disabled && html`<span class="size-note">새 단어 ${c.unlearned}개 남음</span>`}
       </button>`;
   }
 
-  function ModeSection({ title, desc, Icon, mode, c, onStart }) {
+  function ModeSection({ title, desc, mode, c, onStart }) {
     return html`
-      <section class="grid gap-4">
-        <div class="grid gap-1">
-          <h2 class="section-title"><span class="section-icon"><${Icon} size=${16} /></span>${title}</h2>
-          <p class="text-[14px] text-muted">${desc}</p>
+      <section class="home-mode">
+        <div class="home-mode-head">
+          <h2 class="home-h2">${title}</h2>
+          <p class="home-desc">${desc}</p>
         </div>
-        <div class="grid gap-3 sm:grid-cols-3">
-          ${[20, 40, 80].map(n => html`<${ModeCard} key=${n} n=${n} mode=${mode} c=${c} onStart=${onStart} />`)}
+        <div class="size-row">
+          ${[20, 40, 80].map(n => html`<${SizeButton} key=${n} n=${n} mode=${mode} c=${c} onStart=${onStart} />`)}
         </div>
       </section>`;
   }
@@ -1282,35 +1315,36 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
     const s = store.session;
     return html`
       <${Fragment}>
-        <div class="max-w-[1040px] mx-auto pt-6 pb-36 grid gap-11">
-          <header class="flex items-center justify-between gap-3 flex-wrap">
+        <div class="home">
+          <header class="home-header">
             <div class="flex items-center gap-2.5">
               <span class="logo" aria-hidden="true">V</span>
-              <div class="leading-tight">
-                <p class="text-[15px] font-semibold tracking-tight">Vocabulary 22000</p>
-                <p class="text-[12px] text-muted">적응형 단어 암기</p>
-              </div>
+              <p class="text-[15px] font-semibold tracking-tight">Vocabulary 22000</p>
             </div>
-            <span class="chip-quiet">${Storage.ok ? "기록은 이 브라우저에 저장돼요" : "이 창에서는 기록이 저장되지 않아요"}</span>
+            <span class="home-note">${Storage.ok ? "기록은 이 브라우저에 저장돼요" : "이 창에서는 기록이 저장되지 않아요"}</span>
           </header>
 
-          <section class="grid gap-8 md:grid-cols-[1.25fr_1fr] items-center">
-            <div class="grid gap-4">
-              <p class="eyebrow">오늘의 학습</p>
-              <h1 class="display">오늘은 몇 개를<br />외워볼까요?</h1>
-              <p class="lead">스스로 채점할 필요 없어요. 헷갈리는 단어는 알아서 다시 보여 드려요.</p>
+          <section class="home-hero">
+            <div class="home-hero-text">
+              <h1 class="home-h1">오늘은 몇 개를 외워볼까요?</h1>
+              <p class="home-desc">헷갈리는 단어는 알아서 다시 보여 드려요.</p>
             </div>
-            <${StatPanel} c=${c} />
+            <div class="home-hero-side">
+              <div class="home-mascot bob" aria-hidden="true"><${Mascot} pose="great" size=${76} /></div>
+              <${StatPanel} c=${c} />
+            </div>
           </section>
 
           ${s && html`<${ResumeBanner} s=${s} onResume=${onResume} onAbandon=${() => onSheet({ type: "abandon" })} />`}
 
-          <${ModeSection} title="단어 암기" mode="learn" Icon=${I.Layers} c=${c} onStart=${onStart}
-            desc="처음 보는 단어는 익히기 카드로 먼저 보고, 묶음별로 외운 뒤 많이 틀린 단어만 모아 최종 테스트까지 갑니다." />
-          <${ModeSection} title="객관식 퀴즈" mode="quiz" Icon=${I.ListChecks} c=${c} onStart=${onStart}
-            desc="4지선다 실전 테스트예요. 외운 단어부터 출제하고, 모두 맞힐 때까지 이어집니다." />
+          <div class="home-modes">
+            <${ModeSection} title="단어 암기" mode="learn" c=${c} onStart=${onStart}
+              desc="처음 보는 단어를 카드로 익히고, 마지막에 한 번 더 확인해요." />
+            <${ModeSection} title="객관식 퀴즈" mode="quiz" c=${c} onStart=${onStart}
+              desc="외운 단어로 4지선다 실전 테스트를 해요." />
+          </div>
 
-          <footer class="flex flex-wrap justify-end gap-4 text-[12.5px]">
+          <footer class="home-footer">
             <button type="button" class="link-quiet" onClick=${() => onSheet({ type: "reset" })}>학습 기록 초기화</button>
           </footer>
         </div>
