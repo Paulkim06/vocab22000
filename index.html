@@ -852,11 +852,10 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
     preview: "translate(-46%, 0) rotate(-4deg) scale(.96)"
   };
   function verdictOf(p) {
-    const sec = (p.ms / 1000).toFixed(1);
-    if (p.grade === "know") return { cls: "tag-know", icon: I.Check, short: `${sec}초 · 통과`, long: `${sec}초 · 완벽히 앎 · 이번 단계 통과` };
-    if (p.grade === "hard") return { cls: "tag-hard", icon: I.Timer, short: `${sec}초 · 헷갈림`, long: `${sec}초 · 조금 헷갈림 · 6~7장 뒤에 다시` };
-    if (p.correct) return { cls: "tag-again", icon: I.Timer, short: `${sec}초 · 시간 초과`, long: `${sec}초 · 6초 초과 · 3~4장 뒤에 다시` };
-    return { cls: "tag-again", icon: I.X, short: "오답", long: "오답 · 3~4장 뒤에 다시" };
+    if (p.grade === "know") return { cls: "tag-know", icon: I.Check, short: "정답", long: "정답" };
+    if (p.grade === "hard") return { cls: "tag-hard", icon: I.Timer, short: "정답", long: "정답 · 한 번 더 볼게요" };
+    if (p.correct) return { cls: "tag-again", icon: I.Timer, short: "정답", long: "정답 · 한 번 더 볼게요" };
+    return { cls: "tag-again", icon: I.X, short: "오답", long: "오답 · 한 번 더 볼게요" };
   }
 
   function CardRun({ s, w, preview, ghosts, dispatch, speakingId, speak, active }) {
@@ -1033,16 +1032,12 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
             <button type="button" class="btn-primary w-full" onClick=${next}>
               ${flipped ? html`익혔어요 · 다음 <${I.ArrowRight} size=${18} />` : html`<${I.RotateCcw} size=${18} /> 뜻 보기`}
             </button>
-            <p class="hint-row"><span>처음 보는 단어는 시간을 재지 않아요. 3~4장 뒤에 다시 나오면 그때부터 잽니다.</span></p>
+            <p class="hint-row"><span>처음 보는 단어예요. 뜻과 예문을 보고 천천히 익혀 보세요.</span></p>
           </div>` : html`
           <div class="grid gap-3">
             <div class="verdict-row" aria-live="polite">
               ${v ? html`<span class=${"verdict " + v.cls}><${v.icon} size=${15} /> ${v.long}</span>`
-                  : html`<p class="hint-row">
-                      <span><i class="dot" style=${{ background: "var(--brand)" }}></i>3초 이내 통과</span>
-                      <span><i class="dot" style=${{ background: "var(--hard)" }}></i>6초 이내 6~7장 뒤</span>
-                      <span><i class="dot" style=${{ background: "var(--again)" }}></i>그 외 3~4장 뒤</span>
-                    </p>`}
+                  : null}
             </div>
             <div class="choices" role="group" aria-label="뜻 고르기">
               ${choices.map((cid, i) => {
@@ -1097,7 +1092,7 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
       const title = s.mode === "quiz" ? `퀴즈 ${s.size}문항 완료` : s.source === "review" ? `${s.size}개 복습 완료` : `${s.size}개를 모두 외웠어요`;
       const detail = s.mode === "quiz"
         ? `첫 시도 정답률 ${L.accuracy(s)}% · 평균 ${(L.avgMs(s) / 1000).toFixed(1)}초`
-        : s.source === "review" ? "최종 테스트까지 모두 3초 안에 통과했어요." : `최종 테스트 통과. 외운 단어에 ${s.size}개가 추가됐어요.`;
+        : s.source === "review" ? "최종 테스트까지 모두 통과했어요." : `최종 테스트 통과. 외운 단어에 ${s.size}개가 추가됐어요.`;
       return { line, title, detail, next: null, cta: "결과 보기", onNext, big: true };
     }
     const nextPhase = s.phases[s.phaseIdx + 1];
@@ -1107,7 +1102,7 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
     return {
       line,
       title: `${phase.name} 통과`,
-      detail: `${s.setIds.length}개를 모두 3초 안에 맞혔어요.${repeated ? ` 그중 ${repeated}개는 다시 나왔던 단어예요.` : " 한 번도 다시 나온 단어가 없어요."}`,
+      detail: `${s.setIds.length}개를 모두 맞혔어요.${repeated ? ` 그중 ${repeated}개는 다시 나왔던 단어예요.` : " 한 번도 다시 나온 단어가 없어요."}`,
       next: { eyebrow: `다음 · Phase ${s.phaseIdx + 2}`, title: nextPhase.name, desc: nextDesc },
       cta: "다음 단계 시작", onNext, big: false
     };
@@ -1129,7 +1124,7 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
           <button type="button" class="icon-btn" onClick=${goHome} aria-label="나가기. 진행 상황은 저장돼요" title="나가기 (진행 상황은 저장돼요)"><${I.X} size=${18} /></button>
           <div class="text-center min-w-0">
             <p class="text-[13.5px] font-semibold truncate">${label} · ${s.size}${s.mode === "quiz" ? "문항" : "개"}</p>
-            <p class="text-[12px] text-muted tnum">${s.mode === "quiz" ? "3초 안에 맞히면 통과" : `Phase ${s.phaseIdx + 1} / ${s.phases.length}`}</p>
+            <p class="text-[12px] text-muted tnum">${s.mode === "quiz" ? "4지선다" : `Phase ${s.phaseIdx + 1} / ${s.phases.length}`}</p>
           </div>
           <div class="w-10" aria-hidden="true"></div>
         </div>
@@ -1160,7 +1155,7 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
       : s.source === "review" ? "외운 단어 목록은 그대로 유지돼요." : `외운 단어가 모두 ${c.learned}개가 됐어요.`;
     const stats = isQuiz
       ? [["첫 시도 정답률", L.accuracy(s) + "%"], ["평균 응답", (L.avgMs(s) / 1000).toFixed(1) + "초"], ["푼 문제 수", s.answers], ["다시 나온 횟수", s.tally.hard + s.tally.again]]
-      : [["푼 카드 수", s.answers], ["3초 안 통과", s.tally.know], ["6초 안 정답", s.tally.hard], ["느림·오답", s.tally.again]];
+      : [["푼 카드 수", s.answers], ["바로 맞힘", s.tally.know], ["다시 본 횟수", s.tally.hard + s.tally.again], ["첫 시도 정답률", L.accuracy(s) + "%"]];
     const again = isQuiz ? `퀴즈 ${s.size}문항 다시` : s.source === "review" ? "한 번 더 복습" : `새 단어 ${s.size}개 이어서`;
     return html`
       <div class="max-w-[640px] mx-auto pt-8 pb-28 grid gap-6">
@@ -1179,7 +1174,7 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
         </section>
         <section class="panel p-5 grid gap-4">
           <h2 class="font-bold text-[16px] flex items-center gap-2"><${I.Trophy} size=${17} /> 가장 많이 틀린 단어 Top 5</h2>
-          ${top.length === 0 ? html`<p class="text-muted">다시 나온 단어 없이 모두 3초 안에 통과했어요.</p>` : html`
+          ${top.length === 0 ? html`<p class="text-muted">다시 나온 단어 없이 모두 통과했어요.</p>` : html`
             <ol class="grid gap-3.5">
               ${top.map((id, i) => {
                 const w = L.BY_ID[id];
@@ -1235,7 +1230,7 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
 
   function ModeCard({ n, mode, c, onStart }) {
     const disabled = mode === "learn" && c.unlearned < n;
-    const flow = mode === "learn" ? L.flowOf(n) : [`4지선다 ${n}문항`, "3초 안에 맞힐 때까지 반복", "첫 시도 정답률 측정"];
+    const flow = mode === "learn" ? L.flowOf(n) : [`4지선다 ${n}문항`, "모두 맞힐 때까지 반복", "첫 시도 정답률 측정"];
     const go = () => { if (!disabled) onStart(mode, mode === "learn" ? "new" : "quiz", n); };
     return html`
       <button type="button" class="mode" aria-disabled=${disabled} onClick=${go}
@@ -1303,12 +1298,7 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
             <div class="grid gap-4">
               <p class="eyebrow">오늘의 학습</p>
               <h1 class="display">오늘은 몇 개를<br />외워볼까요?</h1>
-              <p class="lead">스스로 채점할 필요 없어요. 뜻을 고르기까지 걸린 시간으로 얼마나 아는지 판단해서, 늦게 맞히거나 틀린 단어를 몇 장 뒤에 다시 보여 줍니다.</p>
-              <div class="flex flex-wrap gap-2">
-                <span class="legend"><i class="dot" style=${{ background: "var(--brand)" }}></i>3초 이내 · 통과</span>
-                <span class="legend"><i class="dot" style=${{ background: "var(--hard)" }}></i>6초 이내 · 6~7장 뒤</span>
-                <span class="legend"><i class="dot" style=${{ background: "var(--again)" }}></i>6초 초과·오답 · 3~4장 뒤</span>
-              </div>
+              <p class="lead">스스로 채점할 필요 없어요. 헷갈리는 단어는 알아서 다시 보여 드려요.</p>
             </div>
             <${StatPanel} c=${c} />
           </section>
@@ -1318,7 +1308,7 @@ if (typeof module !== "undefined") module.exports = VocabLogic;
           <${ModeSection} title="단어 암기" mode="learn" Icon=${I.Layers} c=${c} onStart=${onStart}
             desc="처음 보는 단어는 익히기 카드로 먼저 보고, 묶음별로 외운 뒤 많이 틀린 단어만 모아 최종 테스트까지 갑니다." />
           <${ModeSection} title="객관식 퀴즈" mode="quiz" Icon=${I.ListChecks} c=${c} onStart=${onStart}
-            desc="4지선다 실전 테스트예요. 외운 단어부터 출제하고, 모두 3초 안에 맞힐 때까지 이어집니다." />
+            desc="4지선다 실전 테스트예요. 외운 단어부터 출제하고, 모두 맞힐 때까지 이어집니다." />
 
           <footer class="flex flex-wrap justify-end gap-4 text-[12.5px]">
             <button type="button" class="link-quiet" onClick=${() => onSheet({ type: "reset" })}>학습 기록 초기화</button>
